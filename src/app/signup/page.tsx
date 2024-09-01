@@ -16,6 +16,7 @@ export default function Signup() {
       firstName: formData.get("first-name"),
       lastName: formData.get("last-name"),
     };
+
     const response: any = await signup(body);
     console.log("signup response::", response);
     if (response.data && response.data.token) {
