@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import Sidebar from "@/components/navbar/Sidebar";
 import Profile from "@/components/navbar/Profile";
+import Counter from "@/components/navbar/counter";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,8 +22,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <div>
-          <div className="flex fixed top-0 right-0  left-0 bg-white  border-b shadow-sm justify-between">
+          <div className="flex fixed top-0 right-0  left-0 bg-white  border-b shadow-sm justify-between items-center">
             <Sidebar />
+            <Counter />
             <Profile />
           </div>
         </div>

@@ -61,8 +61,11 @@ import {
 
 import { toast } from "sonner";
 
+import { FormEvent } from "react";
+
 import { createCustomer } from "@/utility/actions/customer/createCustomer";
 
+import { importCustomers } from "@/utility/actions/customer/importCustomers";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
@@ -103,7 +106,6 @@ export function DataTable<TData, TValue>({
   });
 
   async function handleSubmit(formData: FormData) {
-    console.log("first");
     console.log(formData);
 
     const body = {
@@ -123,6 +125,26 @@ export function DataTable<TData, TValue>({
       console.log("🚀 ~ response.data:", response.data);
       console.log("response successful");
       toast.success("Customer Created");
+      refreshData();
+    } else {
+      console.log("response", response);
+      toast.error(response.error);
+    }
+  }
+
+  async function handleImport(event: FormEvent<HTMLFormElement>) {
+    console.log("firstHandleImport");
+
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    console.log("🚀 ~ formData:", formData);
+
+    const response = await importCustomers(formData);
+
+    if (response) {
+      console.log("🚀 ~ response.data:", response.data);
+      console.log("response successful");
+      toast.success("Customer Imported Successfully!");
       refreshData();
     } else {
       console.log("response", response);
@@ -185,15 +207,17 @@ export function DataTable<TData, TValue>({
                   Upload valid CSV file of customer data for bulk import.
                 </DialogDescription>
               </DialogHeader>
-              <div className="grid w-full max-w-sm items-center gap-1.5 mt-3 mb-3">
-                <Label htmlFor="picture"> CSV/ XLSX </Label>
-                <Input id="picture" type="file" />
-              </div>
-              <DialogFooter>
-                <Button type="submit" className="px-10 py-5 text-base">
-                  Import
-                </Button>
-              </DialogFooter>
+              <form onSubmit={handleImport}>
+                <div className="grid w-full max-w-sm items-center gap-1.5 mt-3 mb-3">
+                  <Label htmlFor="file">CSV/ XLSX</Label>
+                  <Input id="file" name="customers" type="file" />
+                </div>
+                <DialogFooter>
+                  <Button type="submit" className="px-10 py-5 text-base">
+                    Import
+                  </Button>
+                </DialogFooter>
+              </form>
             </DialogContent>
           </Dialog>
           <Button variant="outline" className=" mr-5">

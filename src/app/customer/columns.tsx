@@ -4,12 +4,27 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 
 import { MoreHorizontal } from "lucide-react";
+import { HiOutlineUserAdd } from "react-icons/hi";
+
 import { RiDeleteBinLine } from "react-icons/ri";
 import { GoPencil } from "react-icons/go";
 
 import { deleteCustomer } from "@/utility/actions/customer/deleteCustomer";
 
 import { toast } from "sonner";
+
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   AlertDialog,
@@ -23,6 +38,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -34,6 +59,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Checkbox } from "@/components/ui/checkbox";
+
+import { updateCustomer } from "@/utility/actions/customer/updateCustomer";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -51,7 +78,10 @@ interface ColumnProps {
   refreshData: () => void; // Refresh data function passed from page.tsx
 }
 
-const handleDelete = async (customer: CustomerData, refreshData: () => void) => {
+const handleDelete = async (
+  customer: CustomerData,
+  refreshData: () => void
+) => {
   console.log("first");
   const response: any = await deleteCustomer(customer.id);
   console.log("FOURTH");
@@ -60,13 +90,48 @@ const handleDelete = async (customer: CustomerData, refreshData: () => void) => 
     console.log("FIFTH");
     toast.success("Customer Deleted, please refresh the page");
     refreshData(); // Trigger data refresh after deletion
-
   } else {
     console.log("SIXTH");
   }
 };
 
-export const columns = ({ refreshData }: ColumnProps): ColumnDef<CustomerData>[] => [
+const handleUpdate = async (
+  formData: FormData,
+  refreshData: () => void,
+  customer: CustomerData
+) => {
+  console.log("first");
+  console.log(formData);
+  const body = {
+    name: formData.get("name"),
+    address: formData.get("address"),
+    contactNumber: formData.get("contactNumber"),
+    quantity: formData.get("quantity"),
+    agreedRate: formData.get("agreedRate"),
+    isSpecialOrder: formData.get("isSpecialOrder"),
+  };
+
+  const id = customer.id;
+
+  const response: any = await updateCustomer(body, id);
+
+  console.log("create customer response::", response);
+  console.log(response.error);
+
+  if (response.data) {
+    console.log("🚀 ~ response.data:", response.message);
+    console.log("response successful");
+    toast.success("Customer updated successfully!");
+    refreshData();
+  } else {
+    console.log("response", response);
+    toast.error(response.error);
+  }
+};
+
+export const columns = ({
+  refreshData,
+}: ColumnProps): ColumnDef<CustomerData>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -91,7 +156,18 @@ export const columns = ({ refreshData }: ColumnProps): ColumnDef<CustomerData>[]
   },
   {
     accessorKey: "id",
-    header: "Id",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="pl-0"
+        >
+          Id
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "name",
@@ -118,7 +194,18 @@ export const columns = ({ refreshData }: ColumnProps): ColumnDef<CustomerData>[]
   },
   {
     accessorKey: "quantity",
-    header: "Quantity",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="pl-0"
+        >
+          Quantity
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
   },
   {
     accessorKey: "agreedRate",
@@ -151,8 +238,109 @@ export const columns = ({ refreshData }: ColumnProps): ColumnDef<CustomerData>[]
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              <GoPencil className="text-base mr-2" />
-              Edit
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="w-full flex items-center">
+                    <GoPencil className="text-base mr-2 border-1 border-white" />
+                    Edit
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[507px]">
+                  <DialogHeader>
+                    <DialogTitle>Edit Customer</DialogTitle>
+                    <DialogDescription>
+                      Enter customer details carefully as all delivery and
+                      transaction will be based on the given details.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const formData = new FormData(e.currentTarget);
+                      handleUpdate(formData, refreshData, customer);
+                    }}
+                  >
+                    <div className="grid gap-4 py-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="name" className="text-right">
+                          Name
+                        </Label>
+                        <Input
+                          type="text"
+                          name="name"
+                          placeholder="name"
+                          className="col-span-3"
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="username" className="text-right">
+                          Address
+                        </Label>
+                        <Input
+                          type="text"
+                          name="address"
+                          placeholder="address"
+                          className="col-span-3"
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="contactNumber" className="text-right">
+                          Contact No.
+                        </Label>
+                        <Input
+                          type="number"
+                          name="contactNumber"
+                          placeholder="contactNumber"
+                          className="col-span-3"
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="quantity" className="text-right">
+                          Quantity
+                        </Label>
+                        <Input
+                          type="number"
+                          name="quantity"
+                          placeholder="quantity"
+                          className="col-span-3"
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="rate" className="text-right">
+                          Rate
+                        </Label>
+                        <Input
+                          type="number"
+                          name="agreedRate"
+                          placeholder="agreedRate"
+                          className="col-span-3"
+                        />
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="isSpecialOrder" className="text-right">
+                          Special Order ?
+                        </Label>
+                        <Select name="isSpecialOrder" defaultValue="false">
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue placeholder="No" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectGroup>
+                              <SelectItem value="true">Yes</SelectItem>
+                              <SelectItem value="false">No</SelectItem>
+                            </SelectGroup>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button type="submit" className="px-10 py-5 text-base">
+                        Save Changes
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
               <AlertDialog>
