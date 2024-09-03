@@ -1,7 +1,7 @@
  export const importCustomers = async (payload:any) => {
 
   try {
-    const response = await fetch(`http://localhost:7345/customer/bulk-upload`, {
+    const response = await fetch(`https://business-management-server-il50.onrender.com/customer/bulk-upload`, {
       method: 'POST',
       body: payload,
     });
