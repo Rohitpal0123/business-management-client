@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 export async function getAllCustomer() {
   try {
     console.log("fetching customers...");
-    const response = await fetch("http://localhost:7345/customer", {
+    const response = await fetch("https://business-management-server-il50.onrender.com/customer", {
       method: "GET",
     });
     console.log("response", response);
