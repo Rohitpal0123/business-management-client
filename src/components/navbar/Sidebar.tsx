@@ -16,6 +16,7 @@ import { VscHistory } from "react-icons/vsc";
 import { HiOutlineHome } from "react-icons/hi2";
 import { IoReceiptOutline } from "react-icons/io5";
 import { MdPayment } from "react-icons/md";
+import { AiOutlineMenu } from "react-icons/ai";
 
 import { useRouter } from "next/navigation";
 
@@ -33,17 +34,13 @@ export default function Sidebar() {
   };
   return (
     <div className="flex justify-between my-3 px-3">
-      <div className="grid grid-cols-1 gap-2">
+      <div className="grid grid-cols-1 gap-2 ">
         <Sheet>
           <SheetTrigger
             className="data-[state=closed]:duration-100 data-[state=open]:duration-100"
             asChild
           >
-            <img
-              src="/menu.svg"
-              alt="Menu Icon"
-              className="border px-2 py-1 border-slate-300 rounded-md hover:bg-slate-100"
-            />
+            <AiOutlineMenu className=" text-3xl hover:bg-slate-100" />
           </SheetTrigger>
           <SheetContent side="left">
             <SheetHeader className="mt-4">
