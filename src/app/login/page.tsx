@@ -5,16 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link"; // Importing Link component
+import Image from "next/image";
 
 export default function Signup() {
   return (
     <div className="flex h-screen w-screen">
       {/* Left Side Image */}
       <div className="w-1/2 h-full">
-        <img
+      <Image
           src="/signup.svg"
-          alt="Image"
-          className=" w-full h-full"
+          alt="signup"
+          width={1000}
+          height={1000}
         />
       </div>
 

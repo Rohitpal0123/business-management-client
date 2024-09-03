@@ -8,6 +8,7 @@ import Link from "next/link"; // Importing Link component
 import { signup } from "@/utility/actions/authentication/signup";
 import { redirect } from "next/navigation";
 import { toast } from "sonner";
+import Image from "next/image";
 export default function Signup() {
   async function handleSignup(formData: FormData) {
     const body = {
@@ -33,16 +34,16 @@ export default function Signup() {
   }
 
   return (
-    <div>
+    <div className="flex h-screen"> 
+      <div className="w-full h-full">
+        <Image
+          src="/signup.svg"
+          alt="signup"
+          width={1000}
+          height={1000}
+        />
+      </div>
       <form action={handleSignup} className="flex h-screen w-screen">
-        {/* Left Side Image */}
-        <div className="w-full h-full">
-          <img
-            src="/signup.svg"
-            alt="Image"
-            className="w-full h-full rounded-2xl"
-          />
-        </div>
 
         {/* Right Side Form */}
         <div className="flex h-full justify-center w-full items-center">
