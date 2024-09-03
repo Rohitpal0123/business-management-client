@@ -8,7 +8,7 @@ export const updateCustomer = async (payload: any, id: number) => {
       console.log("Filtered Payload to be sent:", filteredPayload);
       console.log("Updating customer...");
   
-      const response = await fetch(`http://localhost:7345/customer/${id}`, {
+      const response = await fetch(`https://business-management-server-il50.onrender.com/customer/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

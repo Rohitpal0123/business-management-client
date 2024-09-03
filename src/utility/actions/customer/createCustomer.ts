@@ -3,7 +3,7 @@ export const createCustomer = async (payload: any) => {
   try {
     console.log(payload);
     console.log("creating customer...");
-    const response = await fetch("http://localhost:7345/customer/create", {
+    const response = await fetch("https://business-management-server-il50.onrender.com/customer/create", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
