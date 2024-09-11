@@ -1,9 +1,9 @@
-import { revalidatePath } from "next/cache";
+import { BASE_URL } from "../../constants" 
 
 export async function getAllCustomer() {
   try {
     console.log("fetching customers...");
-    const response = await fetch("https://business-management-server-il50.onrender.com/customer", {
+    const response = await fetch(`${BASE_URL}/customer`, {
       method: "GET",
     });
     console.log("response", response);

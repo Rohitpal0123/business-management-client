@@ -1,7 +1,9 @@
+import { BASE_URL } from "../../constants" 
+ 
  export const importCustomers = async (payload:any) => {
 
   try {
-    const response = await fetch(`https://business-management-server-il50.onrender.com/customer/bulk-upload`, {
+    const response = await fetch(`${BASE_URL}/customer/bulk-upload`, {
       method: 'POST',
       body: payload,
     });

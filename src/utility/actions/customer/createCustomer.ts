@@ -1,9 +1,10 @@
-
+import { BASE_URL } from "../../constants";
 export const createCustomer = async (payload: any) => {
   try {
     console.log(payload);
     console.log("creating customer...");
-    const response = await fetch("https://business-management-server-il50.onrender.com/customer/create", {
+    console.log("🚀 ~ BASE_URL:", BASE_URL);
+    const response = await fetch(`${BASE_URL}/customer/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -16,7 +17,7 @@ export const createCustomer = async (payload: any) => {
     }
 
     const data = await response.json();
-    console.log("🚀 ~ data:", data)
+    console.log("🚀 ~ data:", data);
     return data;
   } catch (error) {
     console.log("🚀 ~ error:", error);

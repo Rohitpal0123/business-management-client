@@ -9,8 +9,6 @@ import { HiOutlineUserAdd } from "react-icons/hi";
 import { RiDeleteBinLine } from "react-icons/ri";
 import { GoPencil } from "react-icons/go";
 
-import { deleteCustomer } from "@/utility/actions/customer/deleteCustomer";
-
 import { toast } from "sonner";
 
 import { Label } from "@/components/ui/label";
@@ -60,12 +58,9 @@ import {
 
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { updateCustomer } from "@/utility/actions/customer/updateCustomer";
-
 // This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
 export type CustomerData = {
-  id: number;
+  id?: number;
   name: string;
   address: string;
   contactNumber: string;
@@ -74,64 +69,13 @@ export type CustomerData = {
   isSpecialOrder: boolean;
 };
 
-interface ColumnProps {
-  refreshData: () => void; // Refresh data function passed from page.tsx
-}
-
-const handleDelete = async (
-  customer: CustomerData,
-  refreshData: () => void
-) => {
-  console.log("first");
-  const response: any = await deleteCustomer(customer.id);
-  console.log("FOURTH");
-  console.log(response.message);
-  if (response.message) {
-    console.log("FIFTH");
-    toast.success("Customer Deleted, please refresh the page");
-    refreshData(); // Trigger data refresh after deletion
-  } else {
-    console.log("SIXTH");
-  }
-};
-
-const handleUpdate = async (
-  formData: FormData,
-  refreshData: () => void,
-  customer: CustomerData
-) => {
-  console.log("first");
-  console.log(formData);
-  const body = {
-    name: formData.get("name"),
-    address: formData.get("address"),
-    contactNumber: formData.get("contactNumber"),
-    quantity: formData.get("quantity"),
-    agreedRate: formData.get("agreedRate"),
-    isSpecialOrder: formData.get("isSpecialOrder"),
-  };
-
-  const id = customer.id;
-
-  const response: any = await updateCustomer(body, id);
-
-  console.log("create customer response::", response);
-  console.log(response.error);
-
-  if (response.data) {
-    console.log("🚀 ~ response.data:", response.message);
-    console.log("response successful");
-    toast.success("Customer updated successfully!");
-    refreshData();
-  } else {
-    console.log("response", response);
-    toast.error(response.error);
-  }
-};
-
 export const columns = ({
-  refreshData,
-}: ColumnProps): ColumnDef<CustomerData>[] => [
+  updateCustomer,
+  deleteCustomer,
+}: {
+  updateCustomer: (customer: CustomerData) => void;
+  deleteCustomer: (id: number) => void;
+}): ColumnDef<CustomerData, unknown>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -223,7 +167,7 @@ export const columns = ({
   {
     id: "actions",
     cell: ({ row }) => {
-      const customer = row.original;
+      const customer = row.original; 
 
       return (
         <DropdownMenu>
@@ -257,7 +201,23 @@ export const columns = ({
                     onSubmit={(e) => {
                       e.preventDefault();
                       const formData = new FormData(e.currentTarget);
-                      handleUpdate(formData, refreshData, customer);
+                      const updatedCustomer: CustomerData = {
+                        ...customer,
+                        name: formData.get("name")?.toString() || customer.name,
+                        address: formData.get("address")?.toString() || customer.address,
+                        contactNumber: formData.get("contactNumber")?.toString() || customer.contactNumber,
+                        quantity: Number(formData.get("quantity") || customer.quantity),
+                        agreedRate: Number(formData.get("agreedRate") || customer.agreedRate),
+                        isSpecialOrder: formData.get("isSpecialOrder") === "true",
+                      };
+                    
+                      // Validate that id is present and call updateCustomer
+                      if (updatedCustomer.id) {
+                        updateCustomer(updatedCustomer);
+                        toast.success("Customer updated successfully!");
+                      } else {
+                        toast.error("Error updating customer: ID is missing.");
+                      }
                     }}
                   >
                     <div className="grid gap-4 py-4">
@@ -268,18 +228,18 @@ export const columns = ({
                         <Input
                           type="text"
                           name="name"
-                          placeholder="name"
+                          defaultValue={customer.name}
                           className="col-span-3"
                         />
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="username" className="text-right">
+                        <Label htmlFor="address" className="text-right">
                           Address
                         </Label>
                         <Input
                           type="text"
                           name="address"
-                          placeholder="address"
+                          defaultValue={customer.address}
                           className="col-span-3"
                         />
                       </div>
@@ -288,9 +248,9 @@ export const columns = ({
                           Contact No.
                         </Label>
                         <Input
-                          type="number"
+                          type="text"
                           name="contactNumber"
-                          placeholder="contactNumber"
+                          defaultValue={customer.contactNumber}
                           className="col-span-3"
                         />
                       </div>
@@ -301,26 +261,31 @@ export const columns = ({
                         <Input
                           type="number"
                           name="quantity"
-                          placeholder="quantity"
+                          defaultValue={ customer?.quantity?.toString() ?? "0"}
                           className="col-span-3"
                         />
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="rate" className="text-right">
+                        <Label htmlFor="agreedRate" className="text-right">
                           Rate
                         </Label>
                         <Input
                           type="number"
                           name="agreedRate"
-                          placeholder="agreedRate"
+                          defaultValue={customer?.agreedRate?.toString() ?? "0"}
                           className="col-span-3"
                         />
                       </div>
                       <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="isSpecialOrder" className="text-right">
-                          Special Order ?
+                          Special Order?
                         </Label>
-                        <Select name="isSpecialOrder" defaultValue="false">
+                        <Select
+                          name="isSpecialOrder"
+                          defaultValue={
+                            customer.isSpecialOrder ? "true" : "false"
+                          }
+                        >
                           <SelectTrigger className="w-[100px]">
                             <SelectValue placeholder="No" />
                           </SelectTrigger>
@@ -342,6 +307,7 @@ export const columns = ({
                 </DialogContent>
               </Dialog>
             </DropdownMenuItem>
+
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -353,20 +319,20 @@ export const columns = ({
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>
-                      Are you absolutely sure?
+                      Are you sure you want to delete this customer?
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                      This will permanently delete your customer data and remove
-                      it from our servers.
+                      This action cannot be undone. This will permanently delete
+                      the customer data from our system.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                      onClick={() => handleDelete(customer, refreshData)}
+                      onClick={() => deleteCustomer(customer.id!)}
                       className="hover:text-white border-[#e2e8f0] hover:bg-red-500"
                     >
-                      Continue
+                      Delete
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

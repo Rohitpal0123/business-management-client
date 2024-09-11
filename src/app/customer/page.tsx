@@ -1,29 +1,19 @@
 "use client";
-import { useCallback } from "react";
-import { useState, useEffect } from "react";
-import { CustomerData, columns } from "./columns";
+import { columns } from "./columns"; // This should be a function that returns the column definitions
 import { DataTable } from "./dataTable";
-
-import { getAllCustomer } from "@/utility/actions/customer/getAllCustomer";
+import { useCustomerContext } from "@/utility/store/customerContext";
 
 export default function Customer() {
-  console.log("first");
+  // Use the customer context to get data and functions
+  const { customers, updateCustomer, deleteCustomer } = useCustomerContext();
 
-  const [data, setData] = useState<CustomerData[]>([]);
-
-  const fetchData = useCallback(async () => {
-    const customerData = await getAllCustomer();
-    console.log("🚀 ~ customerData:", customerData)
-    setData(customerData);
-
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  },[fetchData]); 
+  console.log("customerData", customers);
   return (
     <div className="container flex justify-center mx-auto py-10">
-      <DataTable columns={columns({ refreshData: fetchData })} data={data} refreshData={fetchData} />
+      <DataTable
+        columns={columns({ updateCustomer, deleteCustomer })}
+        data={customers}
+      />
     </div>
   );
 }

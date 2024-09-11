@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LiaAngleDownSolid } from "react-icons/lia";
 import { HiOutlineUserAdd } from "react-icons/hi";
-import { FaFileImport } from "react-icons/fa6";
-import { FaFileExport } from "react-icons/fa6";
+import { FaFileImport, FaFileExport } from "react-icons/fa6";
+import { importCustomers } from "@/utility/actions/customer/importCustomers";
 
+import TableSkeleton from "@/components/Loader/tableSkeleton";
 import {
   Dialog,
   DialogContent,
@@ -19,13 +20,11 @@ import {
 import { Label } from "@/components/ui/label";
 
 import * as React from "react";
-
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -60,28 +59,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { toast } from "sonner";
+import { useCustomerContext } from "@/utility/store/customerContext"; // Context Hook for managing customers
 
 import { FormEvent } from "react";
-
-import { createCustomer } from "@/utility/actions/customer/createCustomer";
-
-import { importCustomers } from "@/utility/actions/customer/importCustomers";
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
-  refreshData: () => void;
-}
+import { CustomerData } from "@/utility/store/customerContext";
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  refreshData,
-}: DataTableProps<TData, TValue>) {
+}: {
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+}) {
+  const { addCustomer } = useCustomerContext(); // Pull add and import from context
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
@@ -106,48 +101,28 @@ export function DataTable<TData, TValue>({
   });
 
   async function handleSubmit(formData: FormData) {
-    console.log(formData);
-
-    const body = {
-      name: formData.get("name"),
-      address: formData.get("address"),
-      contactNumber: formData.get("contactNumber"),
-      quantity: formData.get("quantity"),
-      agreedRate: formData.get("agreedRate"),
-      isSpecialOrder: formData.get("isSpecialOrder"),
+    const body: Omit<CustomerData, "id"> = {
+      name: formData.get("name")?.toString() || "",
+      address: formData.get("address")?.toString() || "",
+      contactNumber: formData.get("contactNumber")?.toString() || "",
+      quantity: Number(formData.get("quantity") || 0),
+      agreedRate: Number(formData.get("agreedRate") || 0),
+      isSpecialOrder: formData.get("isSpecialOrder") === "true",
     };
 
-    const response: any = await createCustomer(body);
-    console.log("create customer response::", response);
-    console.log(response.error);
-
-    if (response) {
-      console.log("🚀 ~ response.data:", response.data);
-      console.log("response successful");
-      toast.success("Customer Created");
-      refreshData();
-    } else {
-      console.log("response", response);
-      toast.error(response.error);
-    }
+    addCustomer(body); // Pass the full customer object, including id
+    toast.success("Customer Created");
   }
 
   async function handleImport(event: FormEvent<HTMLFormElement>) {
-    console.log("firstHandleImport");
-
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    console.log("🚀 ~ formData:", formData);
 
-    const response = await importCustomers(formData);
+    const response = await importCustomers(formData); // Use context to import customers
 
     if (response) {
-      console.log("🚀 ~ response.data:", response.data);
-      console.log("response successful");
       toast.success("Customer Imported Successfully!");
-      refreshData();
     } else {
-      console.log("response", response);
       toast.error(response.error);
     }
   }
@@ -298,7 +273,7 @@ export function DataTable<TData, TValue>({
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="isSpecialOrder" className="text-right">
-                      Special Order ?
+                      Special Order?
                     </Label>
                     <Select name="isSpecialOrder" defaultValue="false">
                       <SelectTrigger className="w-[100px]">
@@ -328,18 +303,16 @@ export function DataTable<TData, TValue>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -366,7 +339,7 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  Getting customers...
+                  <TableSkeleton />
                 </TableCell>
               </TableRow>
             )}

@@ -1,7 +1,9 @@
+import { BASE_URL } from "../../constants" 
+
 export const deleteCustomer = async (id: number) => {
   try {
     console.log("SECOND");
-    const response = await fetch(`https://business-management-server-il50.onrender.com/customer/${id}`, {
+    const response = await fetch(`${BASE_URL}/customer/${id}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

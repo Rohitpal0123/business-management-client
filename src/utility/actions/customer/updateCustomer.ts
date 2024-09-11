@@ -1,5 +1,10 @@
+import { BASE_URL } from "../../constants" 
+
+
 export const updateCustomer = async (payload: any, id: number) => {
-    try {
+  try {
+    console.log("🚀 ~ id:", id)
+      console.log("🚀 ~ BASE_URL:", BASE_URL)
       // Filter out any empty values from the payload
       const filteredPayload = Object.fromEntries(
         Object.entries(payload).filter(([key, value]) => value !== "")
@@ -8,7 +13,7 @@ export const updateCustomer = async (payload: any, id: number) => {
       console.log("Filtered Payload to be sent:", filteredPayload);
       console.log("Updating customer...");
   
-      const response = await fetch(`https://business-management-server-il50.onrender.com/customer/${id}`, {
+      const response = await fetch(`${BASE_URL}/customer/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
